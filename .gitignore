@@ -1,0 +1,11 @@
+.vscode/
+.alcache/
+.alpackages/
+.snapshots/
+.output/
+.altestrunner/
+*.app
+rad.json
+*.g.xlf
+*.flf
+**/.DS_Store
