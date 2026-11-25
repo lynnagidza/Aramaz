@@ -1,0 +1,63 @@
+page 50104 "PEN Member List"
+{
+    ApplicationArea = All;
+    Caption = 'PEN Members';
+    PageType = List;
+    SourceTable = "PEN Member";
+    Editable = false;
+    CardPageId = "PEN Member Card";
+
+    layout
+    {
+        area(Content)
+        {
+            repeater(General)
+            {
+                field("No."; Rec."No.")
+                {
+                    ToolTip = 'Specifies the value of the No. field.', Comment = '%';
+                }
+                field("First Name"; Rec."First Name")
+                {
+                    ToolTip = 'Specifies the value of the First Name field.', Comment = '%';
+                }
+                field("Last Name"; Rec."Last Name")
+                {
+                    ToolTip = 'Specifies the value of the Last Name field.', Comment = '%';
+                }
+                field("National ID No."; Rec."National ID No.")
+                {
+                    ToolTip = 'Specifies the value of the National ID No. field.', Comment = '%';
+                }
+                field("Date of Birth"; Rec."Date of Birth")
+                {
+                    ToolTip = 'Specifies the value of the Date of Birth field.', Comment = '%';
+                }
+                field("Employer No."; Rec."Employer No.")
+                {
+                    ToolTip = 'Specifies the value of the Employer No. field.', Comment = '%';
+                }
+                field("Scheme Code"; Rec."Scheme Code")
+                {
+                    ToolTip = 'Specifies the value of the Scheme Code field.', Comment = '%';
+                }
+                field("Date Joined"; Rec."Date Joined")
+                {
+                    ToolTip = 'Specifies the value of the Date Joined field.', Comment = '%';
+                }
+                field("Pensionable Salary"; Rec."Pensionable Salary")
+                {
+                    ToolTip = 'Specifies the value of the Pensionable Salary field.', Comment = '%';
+                }
+                field(Status; Rec.Status)
+                {
+                    ToolTip = 'Specifies the value of the Status field.', Comment = '%';
+                }
+                field(Balance; Rec.Balance)
+                {
+                    ToolTip = 'Specifies the value of the Balance field.', Comment = '%';
+                }
+            }
+        }
+    }
+}

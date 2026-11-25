@@ -12,14 +12,17 @@ table 50100 "PEN Pension Setup"
         field(2; "Member Nos."; Code[20])
         {
             Caption = 'Member Nos.';
+            TableRelation = "No. Series";
         }
         field(3; "Employer Nos."; Code[20])
         {
             Caption = 'Employer Nos.';
+            TableRelation = "No. Series";
         }
         field(4; "Contribution Batch Nos."; Code[20])
         {
             Caption = 'Contribution Batch Nos.';
+            TableRelation = "No. Series";
         }
         field(5; "Remittance Due Day "; Integer)
         {

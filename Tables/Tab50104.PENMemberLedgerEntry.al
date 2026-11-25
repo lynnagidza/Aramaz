@@ -13,14 +13,17 @@ table 50104 "PEN Member Ledger Entry"
         field(2; "Member No."; Code[20])
         {
             Caption = 'Member No.';
+            TableRelation = "PEN Member";
         }
         field(3; "Employer No."; Code[20])
         {
             Caption = 'Employer No.';
+            TableRelation = "PEN Employer";
         }
         field(4; "Scheme Code"; Code[20])
         {
             Caption = 'Scheme Code';
+            TableRelation = "PEN Scheme";
         }
         field(5; "Posting Date"; Date)
         {

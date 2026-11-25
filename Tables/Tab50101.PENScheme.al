@@ -26,14 +26,17 @@ table 50101 "PEN Scheme"
         field(5; "Contribution Receivable Acc."; Code[20])
         {
             Caption = 'Contribution Receivable Acc.';
+            TableRelation = "G/L Account";
         }
         field(6; "Member Liability Acc."; Code[20])
         {
             Caption = 'Member Liability Acc.';
+            TableRelation = "G/L Account";
         }
         field(7; "Penalty Income Acc."; Code[20])
         {
             Caption = 'Penalty Income Acc.';
+            TableRelation = "G/L Account";
         }
         field(8; Blocked; Boolean)
         {
