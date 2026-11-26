@@ -39,7 +39,7 @@ table 50103 "PEN Member"
                 PENMember.SetRange("National ID No.", "National ID No.");
                 PENMember.SetFilter("No.", '<>%1', "No.");
                 if PENMember.FindFirst() then
-                    Error('A member with the National ID No. %1 already exists.');
+                    Error('A member with the National ID No. %1 already exists.', "National ID No.");
             end;
         }
         field(5; "Date of Birth"; Date)
@@ -90,7 +90,7 @@ table 50103 "PEN Member"
         {
             Caption = 'Balance';
             FieldClass = FlowField;
-            CalcFormula = sum("PEN Member Ledger Entry".Amount);
+            CalcFormula = sum("PEN Member Ledger Entry".Amount where("Member No." = field("No.")));
             Editable = false;
         }
     }

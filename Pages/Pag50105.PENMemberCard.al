@@ -26,14 +26,17 @@ page 50105 "PEN Member Card"
                 field("First Name"; Rec."First Name")
                 {
                     ToolTip = 'Specifies the value of the First Name field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("Last Name"; Rec."Last Name")
                 {
                     ToolTip = 'Specifies the value of the Last Name field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("National ID No."; Rec."National ID No.")
                 {
                     ToolTip = 'Specifies the value of the National ID No. field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("Date of Birth"; Rec."Date of Birth")
                 {
@@ -42,6 +45,7 @@ page 50105 "PEN Member Card"
                 field("Employer No."; Rec."Employer No.")
                 {
                     ToolTip = 'Specifies the value of the Employer No. field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("Scheme Code"; Rec."Scheme Code")
                 {
@@ -50,6 +54,7 @@ page 50105 "PEN Member Card"
                 field("Date Joined"; Rec."Date Joined")
                 {
                     ToolTip = 'Specifies the value of the Date Joined field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("Pensionable Salary"; Rec."Pensionable Salary")
                 {

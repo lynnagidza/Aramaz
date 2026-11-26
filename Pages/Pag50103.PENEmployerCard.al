@@ -26,14 +26,17 @@ page 50103 "PEN Employer Card"
                 field(Name; Rec.Name)
                 {
                     ToolTip = 'Specifies the value of the Name field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("Scheme Code"; Rec."Scheme Code")
                 {
                     ToolTip = 'Specifies the value of the Scheme Code field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("KRA PIN"; Rec."KRA PIN")
                 {
                     ToolTip = 'Specifies the value of the KRA PIN field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field(Email; Rec.Email)
                 {

@@ -2,6 +2,8 @@ table 50104 "PEN Member Ledger Entry"
 {
     Caption = 'PEN Member Ledger Entry';
     DataClassification = ToBeClassified;
+    LookupPageId = "PEN Member Ledger Entries";
+    DrillDownPageId = "PEN Member Ledger Entries";
 
     fields
     {
@@ -44,6 +46,7 @@ table 50104 "PEN Member Ledger Entry"
         field(9; "Batch No."; Code[20])
         {
             Caption = 'Batch No.';
+            TableRelation = "PEN Contribution Batch";
         }
         field(10; "Document No."; Code[20])
         {

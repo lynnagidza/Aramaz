@@ -3,7 +3,7 @@ table 50105 "PEN Contribution Batch"
     Caption = 'PEN Contribution Batch';
     DataClassification = ToBeClassified;
     LookupPageId = "PEN Contribution Batches";
-    DrillDownPageId = "PEN Contribution Batches";
+    DrillDownPageId = "PEN Contribution Queues";
 
     fields
     {
@@ -40,6 +40,52 @@ table 50105 "PEN Contribution Batch"
         {
             Caption = 'Employer No.';
             TableRelation = "PEN Employer";
+        }
+        field(7; "Total Employee Contributions"; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("PEN Contribution Queue"."Employee Amount" where("Batch No." = field("No.")));
+            Editable = false;
+        }
+        field(8; "Total Employer Contributions"; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("PEN Contribution Queue"."Employer Amount" where("Batch No." = field("No.")));
+            Editable = false;
+        }
+        field(9; "Posted Employee Contributions"; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("PEN Member Ledger Entry".Amount where("Batch No." = field("No."), "Entry Type" = const("Employee Contribution")));
+            Editable = false;
+        }
+        field(10; "Posted Employer Contributions"; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("PEN Member Ledger Entry".Amount where("Batch No." = field("No."), "Entry Type" = const("Employer Contribution")));
+            Editable = false;
+        }
+        field(11; "G/L Summary Status"; Enum "PEN Contribution Queue Status")
+        {
+            ValuesAllowed = Pending, Posted, Failed;
+            InitValue = Pending;
+        }
+        field(12; "G/L Employee Amount"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(13; "G/L Employer Amount"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(14; "Penalty Amount"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(15; "Penalty Posted"; Boolean)
+        {
+            DataClassification = ToBeClassified;
+            InitValue = false;
         }
     }
     keys

@@ -14,10 +14,12 @@ page 50101 "PEN Scheme List"
                 field("Code"; Rec."Code")
                 {
                     ToolTip = 'Specifies the value of the Code field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field(Description; Rec.Description)
                 {
                     ToolTip = 'Specifies the value of the Description field.', Comment = '%';
+                    ShowMandatory = true;
                 }
                 field("Scheme Type"; Rec."Scheme Type")
                 {

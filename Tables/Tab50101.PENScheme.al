@@ -22,6 +22,8 @@ table 50101 "PEN Scheme"
         field(4; "Employer Cap %"; Decimal)
         {
             Caption = 'Employer Cap %';
+            MinValue = 0;
+            MaxValue = 100;//assumption: percentage is out of 100
         }
         field(5; "Contribution Receivable Acc."; Code[20])
         {

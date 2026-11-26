@@ -65,7 +65,7 @@ table 50102 "PEN Employer"
         {
             Caption = 'Member Count';
             FieldClass = FlowField;
-            CalcFormula = count("PEN Member" where(Status = filter(Active)));
+            CalcFormula = count("PEN Member" where(Status = filter(Active), "Employer No." = field("No.")));
         }
     }
     keys

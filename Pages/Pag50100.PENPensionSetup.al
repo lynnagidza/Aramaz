@@ -4,7 +4,7 @@ page 50100 "PEN Pension Setup"
     Caption = 'PEN Pension Setup';
     PageType = Card;
     SourceTable = "PEN Pension Setup";
-    
+
     layout
     {
         area(Content)
@@ -12,28 +12,30 @@ page 50100 "PEN Pension Setup"
             group(General)
             {
                 Caption = 'General';
-                
-                field("Remittance Due Day "; Rec."Remittance Due Day ")
+
+                field("Remittance Due Day"; Rec."Remittance Due Day")
                 {
                     ToolTip = 'Specifies the value of the Remittance Due Day field.', Comment = '%';
                 }
-                field("Late Penalty % "; Rec."Late Penalty % ")
+                field("Late Penalty %"; Rec."Late Penalty %")
                 {
                     ToolTip = 'Specifies the value of the Late Penalty % field.', Comment = '%';
                 }
-                field("Queue Batch Size "; Rec."Queue Batch Size ")
+                field("Queue Batch Size"; Rec."Queue Batch Size")
                 {
                     ToolTip = 'Specifies the value of the Queue Batch Size field.', Comment = '%';
+                    ShowMandatory = true;
                 }
-                field("Max Retry Attempts "; Rec."Max Retry Attempts ")
+                field("Max Retry Attempts"; Rec."Max Retry Attempts")
                 {
                     ToolTip = 'Specifies the value of the Max Retry Attempts field.', Comment = '%';
+                    ShowMandatory = true;
                 }
             }
             group(Numbering)
             {
                 Caption = 'Numbering';
-                
+
                 field("Member Nos."; Rec."Member Nos.")
                 {
                     ToolTip = 'Specifies the value of the Member Nos. field.', Comment = '%';
@@ -45,6 +47,18 @@ page 50100 "PEN Pension Setup"
                 field("Contribution Batch Nos."; Rec."Contribution Batch Nos.")
                 {
                     ToolTip = 'Specifies the value of the Contribution Batch Nos. field.', Comment = '%';
+                }
+            }
+            group(Posting)
+            {
+                Caption = 'Posting';
+                field("G/L Journal Template"; Rec."G/L Journal Template")
+                {
+                    ShowMandatory = true;
+                }
+                field("G/L Journal Batch"; Rec."G/L Journal Batch")
+                {
+                    ShowMandatory = true;
                 }
             }
         }

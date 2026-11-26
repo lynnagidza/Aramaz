@@ -24,24 +24,42 @@ table 50100 "PEN Pension Setup"
             Caption = 'Contribution Batch Nos.';
             TableRelation = "No. Series";
         }
-        field(5; "Remittance Due Day "; Integer)
+        field(5; "Remittance Due Day"; Integer)
         {
-            Caption = 'Remittance Due Day ';
+            Caption = 'Remittance Due Day';
             InitValue = 9;
+            MinValue = 1;
+            MaxValue = 28;//all months have at least 28 days
         }
-        field(6; "Late Penalty % "; Decimal)
+        field(6; "Late Penalty %"; Decimal)
         {
-            Caption = 'Late Penalty % ';
+            Caption = 'Late Penalty %';
+            MinValue = 0;
+            MaxValue = 100;
         }
-        field(7; "Queue Batch Size "; Integer)
+        field(7; "Queue Batch Size"; Integer)
         {
-            Caption = 'Queue Batch Size ';
+            Caption = 'Queue Batch Size';
             InitValue = 500;
+            MinValue = 1;
         }
-        field(8; "Max Retry Attempts "; Integer)
+        field(8; "Max Retry Attempts"; Integer)
         {
-            Caption = 'Max Retry Attempts ';
+            Caption = 'Max Retry Attempts';
             InitValue = 3;
+            MinValue = 1;
+        }
+        field(9; "G/L Journal Template"; Code[10])
+        {
+            TableRelation = "Gen. Journal Template";
+            trigger OnValidate()
+            begin
+                "G/L Journal Batch" := '';
+            end;
+        }
+        field(10; "G/L Journal Batch"; Code[10])
+        {
+            TableRelation = "Gen. Journal Batch".Name where("Journal Template Name" = field("G/L Journal Template"));
         }
     }
     keys

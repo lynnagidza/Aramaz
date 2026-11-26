@@ -3,6 +3,7 @@ codeunit 50100 "PEN Import Contribution"
     var
         Batch: Record "PEN Contribution Batch";
         Queue: Record "PEN Contribution Queue";
+        StagedQueue: Record "PEN Contribution Queue" temporary;
         CSVBuffer: Record "CSV Buffer" temporary;
         MessageID, EmployerNo, MemberNo : Code[20];
         ImportPeriod: Code[7];
@@ -68,8 +69,6 @@ codeunit 50100 "PEN Import Contribution"
         if ControlTotal < 0 then
             Error('Control total cannot be negative.');
 
-        GetOrCreateBatch();
-
         // Process and validate each line
         for LineNo := FirstDataRow to CSVBuffer.GetNumberOfLines() do begin
             if IsEmptyCSVRow(LineNo) then
@@ -86,6 +85,7 @@ codeunit 50100 "PEN Import Contribution"
         end;
 
         ValidateControlTotal(DataLineCount);
+        CreateBatchAndQueueLines();
     end;
 
     procedure ImportJSON(IStream: InStream)
@@ -141,8 +141,6 @@ codeunit 50100 "PEN Import Contribution"
         if ControlTotal < 0 then
             Error('Control total cannot be negative.');
 
-        GetOrCreateBatch();
-
         // Retrieve and validate the lines array
         if not JsonObj.Get('lines', JsonTok) then
             Error('The JSON file does not contain a lines array.');
@@ -174,6 +172,7 @@ codeunit 50100 "PEN Import Contribution"
         end;
 
         ValidateControlTotal(DataLineCount);
+        CreateBatchAndQueueLines();
     end;
 
     local procedure ResetImportState()
@@ -189,36 +188,43 @@ codeunit 50100 "PEN Import Contribution"
         Clear(EmployerAmount);
         Clear(ReceivedDate);
         Clear(MembersInFile);
+        StagedQueue.Reset();
+        StagedQueue.DeleteAll();
         Batch.Reset();
         Queue.Reset();
     end;
 
-    local procedure GetOrCreateBatch()
+    local procedure CreateBatchAndQueueLines()
+    var
+        StagedLineNo: Integer;
     begin
         Batch.Reset();
         Batch.SetRange("Message Id", MessageID);
+        if Batch.FindFirst() then
+            Error('A contribution batch with Message Id %1 has already been received.', MessageID);
 
-        if Batch.FindFirst() then begin
-            if Batch."Employer No." <> EmployerNo then
-                Error('The existing batch has a different employer.');
+        Batch.Init();
+        Batch.Validate("Message Id", MessageID);
+        Batch.Validate("Employer No.", EmployerNo);
+        Batch.Validate(Period, ImportPeriod);
+        Batch.Validate("Received Date", ReceivedDate);
+        Batch.Validate("Control Total", ControlTotal);
+        Batch.Insert(true);
 
-            if Batch.Period <> ImportPeriod then
-                Error('The existing batch has a different period.');
-
-            if Batch."Received Date" <> ReceivedDate then
-                Error('The existing batch has a different received date.');
-
-            if Batch."Control Total" <> ControlTotal then
-                Error('The existing batch has a different control total.');
-        end else begin
-            Batch.Init();
-            Batch.Validate("Message Id", MessageID);
-            Batch.Validate("Employer No.", EmployerNo);
-            Batch.Validate(Period, ImportPeriod);
-            Batch.Validate("Received Date", ReceivedDate);
-            Batch.Validate("Control Total", ControlTotal);
-            Batch.Insert(true);
-        end;
+        StagedQueue.Reset();
+        if StagedQueue.FindSet() then
+            repeat
+                StagedLineNo += 10000;
+                Queue.Init();
+                Queue.Validate("Batch No.", Batch."No.");
+                Queue.Validate("Line No.", StagedLineNo);
+                Queue.Validate("Member No.", StagedQueue."Member No.");
+                Queue.Validate("Employee Amount", StagedQueue."Employee Amount");
+                Queue.Validate("Employer Amount", StagedQueue."Employer Amount");
+                Queue.Validate(Period, ImportPeriod);
+                Queue.Validate(Status, Enum::"PEN Contribution Queue Status"::Pending);
+                Queue.Insert(true);
+            until StagedQueue.Next() = 0;
     end;
 
     local procedure ProcessContributionLine(NewMemberNo: Text; NewEmployeeAmount: Decimal; NewEmployerAmount: Decimal; SourceLineNo: Integer)
@@ -245,21 +251,12 @@ codeunit 50100 "PEN Import Contribution"
         EmployeeTotal += EmployeeAmount;
         EmployerTotal += EmployerAmount;
 
-        // Preserve existing queue lines during partial re-imports.... however, if more info is provided, allow user to select override or maintain older data (assumption is once uploaded, that's it!)
-        Queue.Reset();
-        Queue.SetCurrentKey("Batch No.", "Member No.");
-        Queue.SetRange("Batch No.", Batch."No.");
-        Queue.SetRange("Member No.", MemberNo);
-        if not Queue.FindFirst() then begin
-            Queue.Init();
-            Queue.Validate("Batch No.", Batch."No.");
-            Queue.Validate("Member No.", MemberNo);
-            Queue.Validate("Employee Amount", EmployeeAmount);
-            Queue.Validate("Employer Amount", EmployerAmount);
-            Queue.Validate(Period, ImportPeriod);
-            Queue.Validate(Status, Enum::"PEN Contribution Queue Status"::Pending);
-            Queue.Insert(true);
-        end;
+        StagedQueue.Init();
+        StagedQueue.Validate("Line No.", MembersInFile.Count() * 10000);
+        StagedQueue.Validate("Member No.", MemberNo);
+        StagedQueue.Validate("Employee Amount", EmployeeAmount);
+        StagedQueue.Validate("Employer Amount", EmployerAmount);
+        StagedQueue.Insert();
     end;
 
     local procedure ValidateControlTotal(DataLineCount: Integer)

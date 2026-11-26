@@ -34,6 +34,15 @@ page 50106 "PEN Contribution Batches"
     {
         area(Processing)
         {
+            action("View Queue Lines")
+            {
+                Caption = 'View Queue Lines';
+                Image = List;
+                RunObject = page "PEN Contribution Queues";
+                RunPageLink = "Batch No." = field("No.");
+                Promoted = true;
+                PromotedCategory = Process;
+            }
             action("Import Contributions")
             {
                 Caption = 'Import Contributions';
