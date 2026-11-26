@@ -31,7 +31,7 @@ table 50106 "PEN Contribution Queue"
         {
             Caption = 'Period';
         }
-        field(7; Status; Blob)//get correct type
+        field(7; Status; Enum "PEN Contribution Queue Status")
         {
             Caption = 'Status';
         }
@@ -49,6 +49,10 @@ table 50106 "PEN Contribution Queue"
         key(PK; "Batch No.", "Line No.")
         {
             Clustered = true;
+        }
+        key(SK; "Batch No.", "Member No.")
+        {
+            Unique = true;
         }
     }
     trigger OnInsert()

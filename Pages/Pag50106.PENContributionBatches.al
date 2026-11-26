@@ -43,8 +43,34 @@ page 50106 "PEN Contribution Batches"
                 PromotedCategory = Process;
                 PromotedOnly = true;
                 trigger OnAction()
+                var
+                    FileName, FileExt : Text;
+                    FileMgmt: Codeunit "File Management";
+                    TempBlob: Codeunit "Temp Blob";
+                    UploadTxt: Label 'Upload';
+                    AcceptedFiles: Label 'Supported files (*.csv;*.json)|*.csv;*.json';
+                    FileNameErr: Label 'Please select a valid CSV or JSON file.';
+                    ImportContribution: Codeunit "PEN Import Contribution";
+                    ImportedInStream: InStream;
+                    PENSetup: Record "PEN Pension Setup";
                 begin
-                    // TODO: limit files to selected extensions, route to the necessary objects/procedures to read this data and insert them accordingly
+                    FileName := FileMgmt.BLOBImportWithFilter(TempBlob, UploadTxt, FileName, AcceptedFiles, AcceptedFiles);
+                    FileExt := FileMgmt.GetExtension(FileName);
+                    if (FileName = '') or (not TempBlob.HasValue()) or not (FileExt in ['csv', 'json']) then begin
+                        FileName := '';
+                        Error(FileNameErr);
+                    end else begin
+                        PENSetup.Get();
+                        PENSetup.TestField("Contribution Batch Nos.");
+                        TempBlob.CreateInStream(ImportedInStream);
+                        case
+                   FileExt of
+                            'csv':
+                                ImportContribution.ImportCSV(ImportedInStream);
+                            'json':
+                                ImportContribution.ImportJSON(ImportedInStream);
+                        end;
+                    end;
                 end;
             }
         }

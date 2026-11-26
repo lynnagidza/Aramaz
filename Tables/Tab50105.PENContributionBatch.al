@@ -36,6 +36,11 @@ table 50105 "PEN Contribution Batch"
         {
             Caption = 'Control Total';
         }
+        field(6; "Employer No."; Code[20])
+        {
+            Caption = 'Employer No.';
+            TableRelation = "PEN Employer";
+        }
     }
     keys
     {
