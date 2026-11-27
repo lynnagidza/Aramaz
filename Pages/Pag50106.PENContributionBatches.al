@@ -34,6 +34,20 @@ page 50106 "PEN Contribution Batches"
     {
         area(Processing)
         {
+            action("Generate Test Data")
+            {
+                Caption = 'Generate Test Data';
+                Image = Create;
+                ToolTip = 'Create one test scheme, 50 employers, 2,000 members, and contribution batches for the current month.';
+                Promoted = true;
+                PromotedCategory = Process;
+                trigger OnAction()
+                var
+                    Generator: Codeunit "PEN Test Data Generator";
+                begin
+                    Generator.GenerateCurrentPeriod();
+                end;
+            }
             action("View Queue Lines")
             {
                 Caption = 'View Queue Lines';

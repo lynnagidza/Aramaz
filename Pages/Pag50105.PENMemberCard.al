@@ -71,6 +71,24 @@ page 50105 "PEN Member Card"
             }
         }
     }
+    actions
+    {
+        area(Reporting)
+        {
+            action("Member Statement")
+            {
+                Caption = 'Member Statement';
+                Image = Report;
+                Promoted = true;
+                PromotedCategory = Report;
+                trigger OnAction()
+                begin
+                    Report.RunModal(Report::"Member Statement", true, false, Rec);
+                end;
+            }
+        }
+    }
+
     trigger OnOpenPage()
     begin
         SetNoFieldVisible();

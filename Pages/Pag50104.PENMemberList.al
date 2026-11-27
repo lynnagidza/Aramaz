@@ -60,4 +60,22 @@ page 50104 "PEN Member List"
             }
         }
     }
+    actions
+    {
+        area(Reporting)
+        {
+            action("Member Statement")
+            {
+                Caption = 'Member Statement';
+                Image = Report;
+                Promoted = true;
+                PromotedCategory = Report;
+                trigger OnAction()
+                begin
+                    CurrPage.SetSelectionFilter(Rec);
+                    Report.RunModal(Report::"Member Statement", true, false, Rec);
+                end;
+            }
+        }
+    }
 }

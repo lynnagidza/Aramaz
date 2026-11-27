@@ -1,5 +1,11 @@
 # Aramaz - Pension Scheme Management
 
+## Submission deliverables and status
+
+- **Member statement report:** Not finished; the report layout and completed code remain outstanding.
+- **Browser testing:** The app has not yet been tested in a browser.
+- **Automated tests:** Test cases are included in the source, but have not yet been run against Business Central.
+
 ## Implemented design
 
 - Master data uses the PEN object prefix and object IDs 50100-50149.
@@ -22,3 +28,9 @@ The processor locks the queue table and claims one `Pending` line by changing it
 ## Reconciliation
 
 For a batch, posted employee and employer ledger totals must equal the successful queue ledger entries. The G/L member-liability credit is the sum of successfully posted employee and employer amounts. Traceability is preserved through the batch number and document number on every member ledger entry and journal line.
+
+## Test data and tests
+
+Use **Generate Test Data** on the Contribution Batches page. The generator uses the current month as its contribution period and creates a scheme, 50 employers, 2,000 members, 50 contribution batches, and 2,001 queue lines. It includes an exited member, a member queued under the wrong employer, and an employer amount over the scheme cap. Configure member, employer, and batch number series before running it.
+
+The PEN Contribution Tests codeunit covers duplicate message-ID intake rejection, isolation of a bad queue line from a valid line, and transition to Dead Letter after repeated failures. The contribution processor also publishes before-validation and after-post integration events for subscribers.

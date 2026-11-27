@@ -67,5 +67,8 @@ table 50104 "PEN Member Ledger Entry"
         {
             Clustered = true;
         }
+        key(MemberPeriod; "Member No.", Period, "Posting Date", "Entry No.")
+        {
+        }
     }
 }
