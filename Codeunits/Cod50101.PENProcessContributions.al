@@ -10,7 +10,6 @@ codeunit 50101 "PEN Process Contributions"
         PENSetup: Record "PEN Pension Setup";
         PENEmployer: Record "PEN Employer";
         PENScheme: Record "PEN Scheme";
-        ProcessingQueue: Record "PEN Contribution Queue";
 
 
     local procedure ProcessPendingContributions()
@@ -77,19 +76,14 @@ codeunit 50101 "PEN Process Contributions"
         CurrBatchSize: Integer;
     begin
         QueueLine.LockTable();
-
         while CurrBatchSize < PENSetup."Queue Batch Size" do begin
             QueueLine.Reset();
             QueueLine.SetRange("Batch No.", BatchNo);
             QueueLine.SetRange(Status, QueueLine.Status::Pending);
             if not QueueLine.FindFirst() then
                 exit;
-            if QueueLine.Get(BatchNo, QueueLine."Line No.") then begin
-                if QueueLine.Status <> QueueLine.Status::Pending then
-                    continue;
-                QueueLine.Validate(Status, QueueLine.Status::Processing);
-                QueueLine.Modify();
-            end;
+            QueueLine.Validate(Status, QueueLine.Status::Processing);
+            QueueLine.Modify();
 
             ProcessQueueLine(QueueLine);
             CurrBatchSize += 1;
@@ -100,7 +94,6 @@ codeunit 50101 "PEN Process Contributions"
     begin
         OnBeforeValidateQueueLine(Queue);
 
-        // one failing line should not stop the other lines in its batch, and its error text is stored on the line
         if not PENBatch.Get(Queue."Batch No.") then begin
             HandleProcessingError(Queue, 'Contribution batch does not exist.');
             exit;
@@ -126,21 +119,12 @@ codeunit 50101 "PEN Process Contributions"
             exit;
         end;
 
-        ProcessingQueue := Queue;
-        if not TryPostContribution() then begin
-            HandleProcessingError(Queue, CopyStr(GetLastErrorText(), 1, 2048));
-            exit;
-        end;
+        PostContribution(Queue);
 
-        Queue.Validate(Status, Enum::"PEN Contribution Queue Status"::Posted);
+        Queue.Validate(Status, Queue.Status::Posted);
         Queue.Modify();
-        OnAfterPostQueueLine(Queue);
-    end;
 
-    [TryFunction]
-    local procedure TryPostContribution()
-    begin
-        PostContribution(ProcessingQueue);
+        OnAfterPostQueueLine(Queue);
     end;
 
     local procedure ActiveMemberExists(MemberNo: Code[20]): Boolean
@@ -164,12 +148,11 @@ codeunit 50101 "PEN Process Contributions"
 
     local procedure NoPostedLineExists(MemberNo: Code[20]; Period: Code[7]): Boolean
     var
-        LocalQueue: Record "PEN Contribution Queue";
+        MemberLedgerEntry: Record "PEN Member Ledger Entry";
     begin
-        LocalQueue.SetRange("Member No.", MemberNo);
-        LocalQueue.SetRange(Period, Period);
-        LocalQueue.SetRange(Status, Enum::"PEN Contribution Queue Status"::Posted);
-        exit(LocalQueue.IsEmpty);
+        MemberLedgerEntry.SetRange("Member No.", MemberNo);
+        MemberLedgerEntry.SetRange(Period, Period);
+        exit(MemberLedgerEntry.IsEmpty());
     end;
 
     local procedure EmployerAmountCapCalculation(MemberNo: Code[20]): Decimal
@@ -273,9 +256,9 @@ codeunit 50101 "PEN Process Contributions"
 
         LateBatch := IsLateBatch(Batch);
         if LateBatch and not Batch."Penalty Posted" then begin
-            PENSetup.TestField("Late Penalty %");
-            PENScheme.TestField("Penalty Income Acc.");
             PenaltyAmount := Round(Batch."Control Total" * PENSetup."Late Penalty %" / 100, 0.01);
+            if PenaltyAmount <> 0 then
+                PENScheme.TestField("Penalty Income Acc.");
         end;
 
         if (TotalToPost = 0) and (PenaltyAmount = 0) then begin
@@ -319,11 +302,7 @@ codeunit 50101 "PEN Process Contributions"
         GenJnlLine.SetRange("Journal Template Name", PENSetup."G/L Journal Template");
         GenJnlLine.SetRange("Journal Batch Name", PENSetup."G/L Journal Batch");
 
-        if not TryPostGLSummary() then begin
-            Batch.Validate("G/L Summary Status", Batch."G/L Summary Status"::Failed);
-            Batch.Modify();
-            exit;
-        end;
+        PostGLSummaryDirect();
 
         Batch.Validate("G/L Employee Amount", EmployeeTotal);
         Batch.Validate("G/L Employer Amount", EmployerTotal);
@@ -335,8 +314,7 @@ codeunit 50101 "PEN Process Contributions"
         Batch.Modify();
     end;
 
-    [TryFunction]
-    local procedure TryPostGLSummary()
+    local procedure PostGLSummaryDirect()
     var
         GenJnlLine: Record "Gen. Journal Line";
         GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
@@ -393,7 +371,8 @@ codeunit 50101 "PEN Process Contributions"
         Queue."Retry Count" += 1;
         Queue."Last Error" := CopyStr(ErrorMessage, 1, MaxStrLen(Queue."Last Error"));
 
-        // Failed lines are retried, and after Max Retry Attempts they move to Dead Letter
+        // Failed lines can be manually reprocessed.
+        // Lines move to Dead Letter when the maximum retry count is reached.
         if Queue."Retry Count" >= PENSetup."Max Retry Attempts" then
             Queue.Validate(Status, Enum::"PEN Contribution Queue Status"::"Dead Letter")
         else
@@ -405,7 +384,6 @@ codeunit 50101 "PEN Process Contributions"
 
     procedure Reprocess(var QueueToReprocess: Record "PEN Contribution Queue")
     var
-        Queue: Record "PEN Contribution Queue";
         Batch: Record "PEN Contribution Batch";
     begin
         if QueueToReprocess.FindSet() then
@@ -413,13 +391,12 @@ codeunit 50101 "PEN Process Contributions"
                 if (QueueToReprocess.Status = QueueToReprocess.Status::Failed) or
                    (QueueToReprocess.Status = QueueToReprocess.Status::"Dead Letter")
                 then begin
-                    Queue := QueueToReprocess;
-                    Queue.Validate(Status, Queue.Status::Pending);
-                    Queue.Validate("Retry Count", 0);
-                    Queue.Validate("Last Error", '');
-                    Queue.Modify();
+                    QueueToReprocess.Validate(Status, QueueToReprocess.Status::Pending);
+                    QueueToReprocess.Validate("Retry Count", 0);
+                    QueueToReprocess.Validate("Last Error", '');
+                    QueueToReprocess.Modify();
 
-                    if Batch.Get(Queue."Batch No.") then begin
+                    if Batch.Get(QueueToReprocess."Batch No.") then begin
                         Batch.Validate("G/L Summary Status", Batch."G/L Summary Status"::Pending);
                         Batch.Modify();
                     end;
